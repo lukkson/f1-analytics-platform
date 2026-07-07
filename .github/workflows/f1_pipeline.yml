@@ -36,7 +36,7 @@ jobs:
         run: pip install dbt-duckdb
 
       - name: Run dbt
-        run: poetry run dbt run --project-dir f1_transform
+        run: poetry run dbt run --project-dir f1_transform --profiles-dir f1_transform
         env:
           ENV: prod
           F1_DUCK_DB_PATH: ${{ secrets.F1_DUCK_DB_PATH }}
