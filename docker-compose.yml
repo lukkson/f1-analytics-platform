@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  airflow:
+    image: apache/airflow:2.10.0
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=sqlite:////opt/airflow/airflow.db
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - _PIP_ADDITIONAL_REQUIREMENTS=requests pydantic pydantic-settings duckdb dependency-injector
+      - ENV=prod
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./data:/opt/airflow/data
+      - ./src:/opt/airflow/src
+      - ./container.py:/opt/airflow/container.py
+      - ./f1_transform:/opt/airflow/f1_transform
+      - ./.env.prod:/opt/airflow/.env.prod
+      - airflow_db:/opt/airflow
+    ports:
+      - "8080:8080"
+    command: >
+      bash -c "airflow db migrate;
+           airflow users create --username admin --password admin --firstname Admin --lastname Admin --role Admin --email admin@example.com;
+           airflow webserver & airflow scheduler"
+    env_file:
+      - .env.prod
+
+volumes:
+  airflow_db:

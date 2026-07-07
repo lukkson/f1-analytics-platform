@@ -1,0 +1,11 @@
+version: 2
+
+sources:
+  - name: f1
+    schema: main
+    tables:
+      - name: lap_times
+      - name: races
+      - name: drivers
+      - name: pit_stops
+      - name: driver_standings

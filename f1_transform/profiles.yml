@@ -1,0 +1,6 @@
+f1_transform:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: ../data/f1.duckdb
