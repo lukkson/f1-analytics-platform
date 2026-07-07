@@ -3,7 +3,6 @@ f1_transform/target/
 f1_transform/logs/
 f1_transform/.user.yml
 *.duckdb
-data/
 __pycache__/
 *.pyc
 .idea/
