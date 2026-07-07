@@ -3,4 +3,4 @@ f1_transform:
   outputs:
     dev:
       type: duckdb
-      path: ../data/f1.duckdb
+      path: "{{ env_var('F1_DUCK_DB_PATH') }}"
