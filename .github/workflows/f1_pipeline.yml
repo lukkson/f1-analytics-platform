@@ -39,4 +39,4 @@ jobs:
         run: poetry run dbt run --project-dir f1_transform --profiles-dir f1_transform
         env:
           ENV: prod
-          F1_DUCK_DB_PATH: ${{ secrets.F1_DUCK_DB_PATH }}
+          F1_DUCK_DB_PATH: ${{ github.workspace }}/data/f1.duckdb
