@@ -1,104 +1,67 @@
 # F1 Analytics Platform
 
-End-to-end data engineering portfolio project built around Formula 1 data. The platform extracts race data from a public API, loads it into a database, and transforms it into analytical models — both locally and on Databricks.
+A personal project I built to learn data engineering by working with something I actually care about — Formula 1. The idea was simple: take real F1 data, build a proper pipeline around it, and deploy it to the cloud.
+
+It ended up covering the full DE stack — from raw API extraction through transformation to a cloud deployment on Databricks with CI/CD.
+
+## What it does
+
+Pulls data from the [Jolpica F1 API](https://api.jolpi.ca) (free, no key needed), processes it through a multi-layer pipeline, and stores the results in Delta Lake on Databricks. A GitHub Actions workflow deploys the pipeline automatically on every push.
 
 ## Architecture
 
 **Local:**
 ```
-Jolpica F1 API → Extract (Python) → Load (DuckDB) → Transform (dbt)
+Jolpica F1 API → Python (extraction) → DuckDB → dbt (SQL transforms)
 ```
 
-**Cloud (Databricks):**
+**Cloud:**
 ```
-Jolpica F1 API → Extract (Python) → Load (Delta Lake) → Transform (PySpark)
+Jolpica F1 API → Python (extraction) → Delta Lake → PySpark (transforms) → Databricks Workflow
 ```
 
-## Tech Stack
+## Stack
 
-- **Python** — data extraction, API clients, Pydantic models
-- **DuckDB** — local analytical database
-- **dbt** — SQL transformations and data models
-- **PySpark** — large-scale data processing
-- **Delta Lake** — cloud data storage on Databricks
-- **Databricks** — cloud platform with automated workflow scheduling
-- **Streamlit** — interactive analytics dashboard
+- **Python** — API clients with Pydantic v2 models, custom DI container, decorator-based error handling
+- **DuckDB** — local analytical database for development
+- **dbt** — SQL-based transformations with window functions and CTEs
+- **PySpark** — distributed transformations on Databricks
+- **Delta Lake** — cloud storage layer on Databricks
+- **Databricks Asset Bundles (DAB)** — infrastructure as code for Databricks jobs
+- **GitHub Actions** — CI/CD pipeline that deploys to Databricks on push
+
 
 ## Databricks
 
-The full pipeline runs on Databricks with Delta Lake as the storage layer and PySpark for transformations. A scheduled Databricks Workflow runs the pipeline automatically every night.
+The cloud pipeline runs as a Databricks Workflow with 8 tasks — 5 extract jobs and 3 transform jobs, with proper `depends_on` chaining. Everything is defined in `databricks.yml` and deployed via DAB.
 
 👉 [View Databricks Notebook](https://dbc-97897a73-b66b.cloud.databricks.com/editor/notebooks/636926413060967?o=7474654766055251)
 
-**Delta Lake tables:**
+## CI/CD
 
-| Table | Description |
-|---|---|
-| `f1.races` | All races in the 2024 season |
-| `f1.drivers` | Driver details |
-| `f1.driver_standings` | Standings after each round |
-| `f1.lap_times` | Lap times per driver |
-| `f1.pit_stops` | Pit stop data |
-| `f1.fastest_laps` | Fastest lap per driver (PySpark transform) |
-| `f1.driver_position_changes` | Position changes across rounds (window functions) |
-| `f1.fastest_pit_stops` | Fastest pit stop per circuit (JOIN transform) |
+On every push to `main`, GitHub Actions:
+1. Installs the Databricks CLI
+2. Runs `databricks bundle deploy` to update the Databricks job definition
 
-## Project Structure
+The job itself runs on a schedule (nightly at 2:00 AM Warsaw time).
 
-```
-src/f1_analytics_platform/
-├── config/         # configuration (env-based)
-├── decorators/     # reusable decorators (error handling)
-├── exceptions/     # custom exception hierarchy
-├── extraction/     # API clients and mappers
-│   ├── clients/    # one client per resource
-│   └── mappers/    # JSON → Pydantic model
-├── loading/        # DuckDB database layer
-└── models/         # Pydantic data models
-f1_transform/
-└── models/         # dbt SQL transformations
-```
-
-## Data Sources
-
-All data comes from the [Jolpica F1 API](https://api.jolpi.ca) (no API key required):
-
-- Races
-- Drivers
-- Driver standings (per round)
-- Lap times
-- Pit stops
-
-## dbt Models
-
-| Model | Description |
-|---|---|
-| `fastest_laps` | Fastest lap per driver (with ms conversion) |
-| `driver_position_changes` | Position changes across rounds using `LAG()` |
-| `fastest_pit_stops` | Fastest pit stop per circuit using CTE + JOIN |
-
-## Running Locally
+## Running locally
 
 ```bash
-# Install dependencies
 poetry install
 
-# Set environment
+# copy and fill in your values
 cp .env.example .env.prod
-# Fill in values in .env.prod
 
-# Run pipeline
+# run the pipeline
 ENV=prod poetry run python test_run.py
 
-# Run dbt transformations
+# run dbt transforms
 cd f1_transform
 poetry run dbt run
-
-# Run dashboard
-poetry run streamlit run streamlit_app.py
 ```
 
-## Environment Variables
+## Environment variables
 
 ```
 F1_BASE_URL=https://api.jolpi.ca/ergast/f1
