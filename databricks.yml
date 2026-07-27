@@ -1,0 +1,62 @@
+bundle:
+  name: f1_analytics_platform
+
+targets:
+  dev:
+    default: true
+
+resources:
+  jobs:
+    f1_pipeline:
+      name: f1_pipeline
+      environments:
+        - environment_key: serverless
+          spec:
+            client: "2"
+            dependencies:
+              - pydantic
+              - pydantic-settings
+              - requests
+              - urllib3
+      tasks:
+        - task_key: extract_drivers
+          environment_key: serverless
+          spark_python_task:
+            python_file: './databricks/jobs/extract/extract_drivers.py'
+        - task_key: extract_lap_times
+          environment_key: serverless
+          spark_python_task:
+            python_file: './databricks/jobs/extract/extract_lap_time.py'
+        - task_key: extract_pit_stops
+          environment_key: serverless
+          spark_python_task:
+            python_file: './databricks/jobs/extract/extract_pit_stops.py'
+        - task_key: extract_races
+          environment_key: serverless
+          spark_python_task:
+            python_file: './databricks/jobs/extract/extract_races.py'
+        - task_key: extract_standings
+          environment_key: serverless
+          spark_python_task:
+            python_file: './databricks/jobs/extract/extract_standings.py'
+        - task_key: transform_fastest_laps
+          environment_key: serverless
+          depends_on:
+            - task_key: extract_lap_times
+          spark_python_task:
+            python_file: './databricks/jobs/transform/fastest_laps.py'
+        - task_key: transform_fastest_pit_stops
+          environment_key: serverless
+          depends_on:
+            - task_key: extract_pit_stops
+          spark_python_task:
+            python_file: './databricks/jobs/transform/fastest_pit_stops.py'
+        - task_key: transform_position_changes
+          environment_key: serverless
+          depends_on:
+            - task_key: extract_standings
+          spark_python_task:
+            python_file: './databricks/jobs/transform/position_changes.py'
+      schedule:
+        quartz_cron_expression: "0 0 2 * * ?"
+        timezone_id: Europe/Warsaw
