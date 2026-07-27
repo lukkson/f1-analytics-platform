@@ -11,32 +11,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Install Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
 
-      - name: Install Poetry
-        run: pip install poetry
+      - name: Install Databricks CLI
+        run: curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
 
-      - name: Install dependencies
-        run: poetry install
-
-      - name: Run pipeline
-        run: poetry run python test_run.py
+      - name: Deploy to Databricks
+        run: databricks bundle deploy
         env:
-          ENV: prod
-          F1_BASE_URL: ${{ secrets.F1_BASE_URL }}
-          F1_TIMEOUT: ${{ secrets.F1_TIMEOUT }}
-          F1_MAX_RETRIES: ${{ secrets.F1_MAX_RETRIES }}
-          F1_BACKOFF_FACTOR: ${{ secrets.F1_BACKOFF_FACTOR }}
-          F1_DUCK_DB_PATH: ${{ secrets.F1_DUCK_DB_PATH }}
-
-      - name: Install dbt
-        run: pip install dbt-duckdb
-
-      - name: Run dbt
-        run: poetry run dbt run --project-dir f1_transform --profiles-dir f1_transform
-        env:
-          ENV: prod
-          F1_DUCK_DB_PATH: ${{ github.workspace }}/data/f1.duckdb
+          DATABRICKS_HOST: https://dbc-97897a73-b66b.cloud.databricks.com
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
