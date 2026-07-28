@@ -1,4 +1,4 @@
-from f1_analytics_platform.extraction.http_client import HttpClient, BaseHttpClient
+from f1_analytics_platform.extraction.http_client import BaseHttpClient
 from f1_analytics_platform.extraction.mappers.race_mapper import RaceMapper
 from f1_analytics_platform.models import Race
 

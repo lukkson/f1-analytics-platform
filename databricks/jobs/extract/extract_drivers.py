@@ -1,13 +1,8 @@
-import sys
 from pyspark.sql import Row
 
-sys.path.insert(
-    0, "/Workspace/Users/lukasz.dlugosz091@gmail.com/Drafts/f1-analytics-platform/src"
-)
-
-from f1_analytics_platform.extraction.http_client import HttpClient
 from f1_analytics_platform.config.http_config import HttpClientConfig
 from f1_analytics_platform.extraction.client.driver_client import DriverClient
+from f1_analytics_platform.extraction.http_client import HttpClient
 
 config = HttpClientConfig()
 http_client = HttpClient(config)

@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from typing import Optional
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -12,5 +13,9 @@ class HttpClientConfig(BaseSettings):
     api_key: Optional[str] = None
 
     model_config = SettingsConfigDict(
-        env_prefix="F1_", env_file=f".env.{os.getenv('ENV', 'prod')}", extra="ignore"
+        env_prefix="F1_",
+        env_file=str(
+            Path(__file__).resolve().parents[3] / f".env.{os.getenv('ENV', 'prod')}"
+        ),
+        extra="ignore",
     )
