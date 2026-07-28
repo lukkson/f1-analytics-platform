@@ -2,7 +2,7 @@ import sys
 from pyspark.sql import Row
 
 sys.path.insert(
-    0, "/Wniorkspace/Users/lukasz.dlugosz091@gmail.com/Drafts/f1-analytics-platform/src"
+    0, "/Workspace/Users/lukasz.dlugosz091@gmail.com/Drafts/f1-analytics-platform/src"
 )
 
 from f1_analytics_platform.extraction.http_client import HttpClient
